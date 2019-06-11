@@ -15,13 +15,13 @@ class Scanner():
         self.image = image
 
     def resize(self):
-        ratio = image.shape[0] / 500.0
-        orig = image.copy()
-        image = imutils.resize(image, height = 500)
-        return image
+        ratio = self.image.shape[0] / 500.0
+        orig = self.image.copy()
+        image = imutils.resize(self.image, height = 500)
+        return image,orig
 
     def find_edges(self):
-        image = self.resize()
+        image,_ = self.resize()
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         gray = cv2.GaussianBlur(gray, (5, 5), 0)
         edged = cv2.Canny(gray, 75, 200)
@@ -54,11 +54,13 @@ class Scanner():
     
     def perspective_transform(self):
         screenCnt = self.contour()
+        image,orig = self.resize()
         cv2.drawContours(image, [screenCnt], -1, (0, 255, 0), 2)
         cv2.imshow("Outline", image)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
-
+        ratio = orig.shape[0] / 500.0
+        
         # apply the four point transform to obtain a top-down
         # view of the original image
         warped = four_point_transform(orig, screenCnt.reshape(4, 2) * ratio)
