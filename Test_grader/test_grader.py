@@ -9,7 +9,7 @@ import imutils
 import cv2
 
 
-class Grader(self):
+class Grader():
 
     def __init__(self,image):
         self.image = image
@@ -45,8 +45,11 @@ class Grader(self):
                 if len(approx) == 4:
                     docCnt = approx
                     break
+        return docCnt
 
     def find_questions(self):
+        docCnt = self.find_paper()
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         paper = four_point_transform(image, docCnt.reshape(4, 2))
         warped = four_point_transform(gray, docCnt.reshape(4, 2))
 
@@ -79,10 +82,12 @@ class Grader(self):
         # the total number of correct answers
         questionCnts = contours.sort_contours(questionCnts,
             method="top-to-bottom")[0]
-        correct = 0
-        return questionCnts
+       
+        return questionCnts,thresh,paper
 
     def evaluate(self):
+        questionCnts,thresh,paper = self.find_questions()
+        correct = 0
         for (q, i) in enumerate(np.arange(0, len(questionCnts), 5)):
             # sort the contours for the current question from
             # left to right, then initialize the index of the
@@ -139,3 +144,5 @@ if __name__ == "__main__":
     args = vars(ap.parse_args())
     ANSWER_KEY = {0: 1, 1: 4, 2: 0, 3: 3, 4: 1}
     image = cv2.imread(args["image"])
+    score = Grader(image)
+    score.evaluate()
