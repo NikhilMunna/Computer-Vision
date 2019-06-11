@@ -50,8 +50,10 @@ class Scanner():
             if len(approx) == 4:
                 screenCnt = approx
                 break
+        return screenCnt
     
     def perspective_transform(self):
+        screenCnt = self.contour()
         cv2.drawContours(image, [screenCnt], -1, (0, 255, 0), 2)
         cv2.imshow("Outline", image)
         cv2.waitKey(0)
@@ -83,4 +85,6 @@ if __name__ == "__main__":
     args = vars(ap.parse_args())
 
     image = cv2.imread(args["image"])
+    scanned = Scanner(image)
+    scanned.perspective_transform()
 
