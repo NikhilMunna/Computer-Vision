@@ -16,9 +16,9 @@ class Scanner():
 
     def resize(self):
         ratio = self.image.shape[0] / 500.0
-        orig = self.image.copy()
+        original = self.image.copy()
         image = imutils.resize(self.image, height = 500)
-        return image,orig
+        return image,original
 
     def find_edges(self):
         image,_ = self.resize()
@@ -34,14 +34,14 @@ class Scanner():
 
     def contour(self):
         edged = self.find_edges()
-        cnts = cv2.findContours(edged.copy(), cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
-        cnts = imutils.grab_contours(cnts)
-        cnts = sorted(cnts, key = cv2.contourArea, reverse = True)[:5]
+        contours = cv2.findContours(edged.copy(), cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+        contours = imutils.grab_contours(contours)
+        contours = sorted(contours, key = cv2.contourArea, reverse = True)[:5]
 
-        for c in cnts:
+        for c in contours:
       
-            peri = cv2.arcLength(c, True)
-            approx = cv2.approxPolyDP(c, 0.02 * peri, True)
+            perimeter = cv2.arcLength(c, True)
+            approx = cv2.approxPolyDP(c, 0.02 * perimeter, True)
 
       
             if len(approx) == 4:
@@ -51,15 +51,15 @@ class Scanner():
     
     def perspective_transform(self):
         screenCnt = self.contour()
-        image,orig = self.resize()
+        image,original = self.resize()
         cv2.drawContours(image, [screenCnt], -1, (0, 255, 0), 2)
         cv2.imshow("Outline", image)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
-        ratio = orig.shape[0] / 500.0
+        ratio = original.shape[0] / 500.0
         
       
-        warped = four_point_transform(orig, screenCnt.reshape(4, 2) * ratio)
+        warped = four_point_transform(original, screenCnt.reshape(4, 2) * ratio)
 
       
         warped = cv2.cvtColor(warped, cv2.COLOR_BGR2GRAY)
@@ -68,7 +68,7 @@ class Scanner():
 
       
         print("STEP 3: Apply perspective transform")
-        cv2.imshow("Original", imutils.resize(orig, height = 650))
+        cv2.imshow("originalinal", imutils.resize(original, height = 650))
         cv2.imshow("Scanned", imutils.resize(warped, height = 650))
         cv2.waitKey(0)
 
