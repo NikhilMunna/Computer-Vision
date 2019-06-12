@@ -28,6 +28,7 @@ class Detect():
     def detect(self):
         net = self.load_model()
         blob = self.blob()
+        h,w = self.shape()
         net.setInput(blob)
         detections = net.forward()
 
