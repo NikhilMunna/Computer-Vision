@@ -1,5 +1,5 @@
 # USAGE
-# python detect_faces.py --image rooster.jpg --prototxt deploy.prototxt.txt --model res10_300x300_ssd_iter_140000.caffemodel
+# python face_detect.py --image rooster.jpg --prototxt deploy.prototxt.txt --model res10_300x300_ssd_iter_140000.caffemodel
 
 import numpy as np
 import argparse
@@ -70,5 +70,5 @@ if __name__ == "__main__":
     args = vars(ap.parse_args())    
 
     image = cv2.imread(args["image"])
-    face = Detect(image)
+    face = Detect(image,args)
     face.detect()
