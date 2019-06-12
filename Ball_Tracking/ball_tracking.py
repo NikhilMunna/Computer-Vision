@@ -15,23 +15,27 @@ class Track():
         self.args = args
     
     def green(self):
-        greenLower = (29, 86, 6)
-        greenUpper = (64, 255, 255)
-        pts = deque(maxlen=args["buffer"])
+        green_min = (29, 86, 6)
+        green_max = (64, 255, 255)
+        points = deque(maxlen=args["buffer"])
+        return green_max,green_min,points
 
     def video_or_webcam(self):
         if not args.get("video", False):
-            vs = VideoStream(src=0).start()
+            video_stream = VideoStream(src=0).start()
 
         # otherwise, grab a reference to the video file
         else:
-            vs = cv2.VideoCapture(args["video"])
+            video_stream = cv2.VideoCapture(args["video"])
         time.sleep(2.0)
+        return video_stream
 
     def track(self):
+        green_max,green_min,points = self.green()
+        video_stream = self.video_or_webcam()
         while True:
             # grab the current frame
-            frame = vs.read()
+            frame = video_stream.read()
 
             # handle the frame from VideoCapture or VideoStream
             frame = frame[1] if args.get("video", False) else frame
@@ -50,23 +54,23 @@ class Track():
             # construct a mask for the color "green", then perform
             # a series of dilations and erosions to remove any small
             # blobs left in the mask
-            mask = cv2.inRange(hsv, greenLower, greenUpper)
+            mask = cv2.inRange(hsv, green_min, green_max)
             mask = cv2.erode(mask, None, iterations=2)
             mask = cv2.dilate(mask, None, iterations=2)
 
             # find contours in the mask and initialize the current
             # (x, y) center of the ball
-            cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL,
+            contours = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL,
                 cv2.CHAIN_APPROX_SIMPLE)
-            cnts = imutils.grab_contours(cnts)
+            contours = imutils.grab_contours(contours)
             center = None
 
             # only proceed if at least one contour was found
-            if len(cnts) > 0:
+            if len(contours) > 0:
                 # find the largest contour in the mask, then use
                 # it to compute the minimum enclosing circle and
                 # centroid
-                c = max(cnts, key=cv2.contourArea)
+                c = max(contours, key=cv2.contourArea)
                 ((x, y), radius) = cv2.minEnclosingCircle(c)
                 M = cv2.moments(c)
                 center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
@@ -80,19 +84,19 @@ class Track():
                     cv2.circle(frame, center, 5, (0, 0, 255), -1)
 
             # update the points queue
-            pts.appendleft(center)
+            points.appendleft(center)
 
             # loop over the set of tracked points
-            for i in range(1, len(pts)):
+            for i in range(1, len(points)):
                 # if either of the tracked points are None, ignore
                 # them
-                if pts[i - 1] is None or pts[i] is None:
+                if points[i - 1] is None or points[i] is None:
                     continue
 
                 # otherwise, compute the thickness of the line and
                 # draw the connecting lines
                 thickness = int(np.sqrt(args["buffer"] / float(i + 1)) * 2.5)
-                cv2.line(frame, pts[i - 1], pts[i], (0, 0, 255), thickness)
+                cv2.line(frame, points[i - 1], points[i], (0, 0, 255), thickness)
 
             # show the frame to our screen
             cv2.imshow("Frame", frame)
@@ -104,11 +108,11 @@ class Track():
 
         # if we are not using a video file, stop the camera video stream
         if not args.get("video", False):
-            vs.stop()
+            video_stream.stop()
 
         # otherwise, release the camera
         else:
-            vs.release()
+            video_stream.release()
 
         # close all windows
         cv2.destroyAllWindows()
