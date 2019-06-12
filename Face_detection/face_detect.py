@@ -23,9 +23,11 @@ class Detect():
     def blob(self):
         blob = cv2.dnn.blobFromImage(cv2.resize(image, (300, 300)), 1.0,
             (300, 300), (104.0, 177.0, 123.0))
+        return blob
 
     def detect(self):
         net = self.load_model()
+        blob = self.blob()
         net.setInput(blob)
         detections = net.forward()
 
