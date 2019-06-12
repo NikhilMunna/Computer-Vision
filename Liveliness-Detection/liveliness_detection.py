@@ -1,5 +1,5 @@
 # USAGE
-# python liveness_detection.py --model liveness.model --le le.pickle --detector face_detector
+# python liveliness_detection.py --model liveness.model --le le.pickle --detector face_detector
 
 from imutils.video import VideoStream
 from keras.preprocessing.image import img_to_array
@@ -29,8 +29,11 @@ class Liveliness():
     def load_model(self):
         model = load_model(args["model"])
         le = pickle.loads(open(args["le"], "rb").read())
+        return model,le
 
     def detect(self):
+        net = self.load_detector()
+        model,le = self.load_model()
         vs = VideoStream(src=0).start()
         time.sleep(2.0)
 
@@ -117,3 +120,6 @@ if __name__ == "__main__":
     ap.add_argument("-c", "--confidence", type=float, default=0.5,
         help="minimum probability to filter weak detections")
     args = vars(ap.parse_args())
+
+    live = Liveliness(args)
+    live.detect()
