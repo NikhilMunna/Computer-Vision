@@ -16,28 +16,19 @@ class DetectFromVideo():
 
 
     def load_model(self):
-        net = cv2.dnn.readNetFromCaffe(self.args["prototxt"], self.args["model"])
-        return net
-
-    # def shape(self):
-    #     (h, w) = image.shape[:2]
-    #     return h,w
-
-    # def blob(self):
-    #     blob = cv2.dnn.blobFromImage(cv2.resize(image, (300, 300)), 1.0,
-    #         (300, 300), (104.0, 177.0, 123.0))
-    #     return blob
+        network = cv2.dnn.readNetFromCaffe(self.args["prototxt"], self.args["model"])
+        return network
 
     def detect_from_video(self):
-        net = self.load_model()
-        vs = VideoStream(src=0).start()
+        network = self.load_model()
+        video_stream = VideoStream(src=0).start()
         time.sleep(2.0)
 
         # loop over the frames from the video stream
         while True:
             # grab the frame from the threaded video stream and resize it
             # to have a maximum width of 400 pixels
-            frame = vs.read()
+            frame = video_stream.read()
             frame = imutils.resize(frame, width=400)
         
             # grab the frame dimensions and convert it to a blob
@@ -45,10 +36,10 @@ class DetectFromVideo():
             blob = cv2.dnn.blobFromImage(cv2.resize(frame, (300, 300)), 1.0,
                 (300, 300), (104.0, 177.0, 123.0))
         
-            # pass the blob through the network and obtain the detections and
+            # pass the blob through the networkwork and obtain the detections and
             # predictions
-            net.setInput(blob)
-            detections = net.forward()
+            network.setInput(blob)
+            detections = network.forward()
 
             # loop over the detections
             for i in range(0, detections.shape[2]):
@@ -85,7 +76,7 @@ class DetectFromVideo():
 
         # do a bit of cleanup
         cv2.destroyAllWindows()
-        vs.stop()
+        video_stream.stop()
 
 
 
