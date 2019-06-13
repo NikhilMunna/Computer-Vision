@@ -1,5 +1,5 @@
 # USAGE
-# python opencv_tutorial_02.py --image tetris_blocks.png
+# python tut_2.py --image tetris_blocks.png
 
 import argparse
 import imutils
@@ -43,25 +43,23 @@ class Tetris():
     def find_contours(self):
         threshold = self.threshold()
         gray = self.convert_to_grayscale()
-        cnts = cv2.findContours(threshold.copy(), cv2.RETR_EXTERNAL,
+        contours= cv2.findContours(threshold.copy(), cv2.RETR_EXTERNAL,
             cv2.CHAIN_APPROX_SIMPLE)
-        cnts = imutils.grab_contours(cnts)
+        contours= imutils.grab_contours(contours)
         
-        return cnts
+        return contours
 
     def draw_outline(self):
-        cnts = self.find_contours()
+        contours= self.find_contours()
         output = self.image.copy()
-        for c in cnts:
-        # draw each contour on the output image with a 3px thick purple
-        # outline, then display the output contours one at a time
+        for c in contours:
             cv2.drawContours(output, [c], -1, (240, 0, 159), 3)
             cv2.imshow("Contours", output)
             cv2.waitKey(0)
 
     def no_of_contours(self):
-        cnts = self.find_contours()
-        text = "I found {} objects!".format(len(cnts))
+        contours= self.find_contours()
+        text = "I found {} objects!".format(len(contours))
         
         output = self.image.copy()
         cv2.putText(output, text, (10, 25),  cv2.FONT_HERSHEY_SIMPLEX, 0.7,
